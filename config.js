@@ -63,8 +63,8 @@ var config = {
         },
         {
             alignment: "right",
-            title: "Land use areas on the campus",
-            description: "Chapter two. UBC land use areas fade in. Each colour shows UBC's planning status for the area. The legend uses the words in UBC's data. Move the mouse over an area to see its name. In this chapter, you can also drag the map and zoom with the + and − buttons.",
+            title: "UBC in 1970",
+            description: "In 1970 the UBC campus looked significantly different then it does today.",
             location: { center: [-123.245, 49.26], zoom: 13, pitch: 0, bearing: 0 },
             // The legend: the colours of the landuse layer's paint, with their meaning
             legend: [
