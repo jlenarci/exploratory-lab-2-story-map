@@ -64,7 +64,7 @@ var config = {
         {
             alignment: "right",
             title: "UBC in 1970",
-            description: "In 1970 the UBC campus looked significantly different then it does today.",
+            description: "In 1970 the UBC campus looked significantly different then it does today. Using the + and - buttons zoom in and out to see what used to be in you favourite spots around campus.",
             location: { center: [-123.245, 49.26], zoom: 13, pitch: 0, bearing: 0 },
             // The legend: the colours of the landuse layer's paint, with their meaning
             legend: [
