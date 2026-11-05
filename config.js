@@ -24,8 +24,8 @@ var config = {
     // Move through the chapters by itself (off here)
     auto: false,
 
-    title: "A History of UBC Campus",
-    subtitle: "How has UBC changed over the past 50 years?",
+    title: "A Century of Change on The UBC Campus",
+    subtitle: "How has UBC changed over the past 100 years?",
     byline: "By Jocelyn Lenarcic",
     footer: "Data: <a href='https://github.com/UBCGeodata/ubc-geospatial-opendata' target='_blank'>UBC Geodata</a>. Imagery: EOxCloudless <a href='https://cloudless.eox.at' target='_blank'>https://cloudless.eox.at</a> by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2024). Elevation (chapter four): Terrain Tiles, accessed on 29 October 2026 from <a href='https://registry.opendata.aws/terrain-tiles' target='_blank'>https://registry.opendata.aws/terrain-tiles</a>. Videos: Musqueam Indian Band (chapter five) and Metro Vancouver (chapter six), on Vimeo. Basemap: <a href='https://openfreemap.org/' target='_blank'>OpenFreeMap</a>, <a href='https://openmaptiles.org/' target='_blank'>OpenMapTiles</a>, © <a href='https://www.openstreetmap.org/copyright' target='_blank'>OpenStreetMap contributors</a>. Created using the <a href='https://github.com/opengeos/maplibre-gl-storymaps' target='_blank'>MapLibre Storytelling</a> template, inspired by <a href='https://github.com/mapbox/storytelling' target='_blank'>Mapbox Storytelling</a>.",
 
@@ -57,14 +57,14 @@ var config = {
         {
             alignment: "left",
             title: "UBC Campus",
-            description: "Throughout the past 50 years, the UBC campus has undergone significant changes to accomodate a growing student population and expansion in infrastructure.",
+            description: "Throughout the past 100 years, the UBC campus has undergone significant changes to accomodate a growing student population and expansion in infrastructure.",
             location: { center: [-123.2460, 49.2606], zoom: 14, pitch: 0, bearing: 0 }
             // No show line: this chapter shows no layers
         },
         {
             alignment: "right",
-            title: "UBC in 1970",
-            description: "In 1970 the UBC campus looked significantly different then it does today. Using the + and - buttons zoom in and out to see what used to be in you favourite spots around campus.",
+            title: "UBC in 1920",
+            description: "Before UBC's Point Grey campus officially opened in 1925, the landscape looked significantly different then it does today. This aerial photograph shows the first buildings, a starting point to the small city that UBC is today.",
             location: { center: [-123.245, 49.26], zoom: 13, pitch: 0, bearing: 0 },
             // The legend: the colours of the landuse layer's paint, with their meaning
             legend: [
