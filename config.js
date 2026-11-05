@@ -62,8 +62,9 @@ var config = {
             // No show line: this chapter shows no layers
         },
         {
-            alignment: "right",
-            title: "UBC in 1920",
+            alignment: "full",
+            title: "UBC through time 1920-2018",
+            <h3>1920-Before Campus Opened<h3>
             description: "Before UBC's Point Grey campus officially opened in 1925, the landscape looked significantly different then it does today. This aerial photograph shows the first buildings, a starting point to the small city that UBC is today.",
             image: "./1920_aerial.png",
             location: { center: [-123.245, 49.26], zoom: 13, pitch: 0, bearing: 0 },
