@@ -65,7 +65,7 @@ var config = {
             alignment: "full",
             title: "UBC through time 1920-2018",
             
-            description:
+            description: '
                  <h3>1920 — Before the Campus Opened</h3>
                  <img src="./1920_aerial.png" style="width:100%; height:auto;">
                  <p>Before UBC's Point Grey campus opened in 1925, the landscape looked significantly different from today.</p>
@@ -83,7 +83,7 @@ var config = {
                 
             location: { center: [-123.245, 49.26], zoom: 13, pitch: 0, bearing: 0 },
             // The legend: the colours of the landuse layer's paint, with their meaning
-            ],
+
             // The layer landuse, at opacity 0.6. (show: ["landuse"] would show it fully.)
             // The reader can move and zoom the map in this chapter
             exploreAllowed: true
