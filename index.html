@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8' />
+    <title>MapLibre Storytelling</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <link rel="icon" type="image/svg+xml" href="https://maplibre.org/favicon.ico">
+    <link href='https://cdn.jsdelivr.net/npm/maplibre-gl@6.15.0/dist/maplibre-gl.css' rel='stylesheet' />
+    <script src="https://unpkg.com/scrollama@3.2.0"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        }
+
+        a,
+        a:hover,
+        a:visited {
+            color: #0071bc;
+        }
+
+        #map {
+            top: 0;
+            height: 100vh;
+            width: 100vw;
+            position: fixed;
+        }
+
+        #header {
+            margin: auto;
+            width: 100%;
+            position: relative;
+            z-index: 5;
+        }
+
+        #header h1,
+        #header h2,
+        #header p {
+            margin: 0;
+            padding: 2vh 2vw;
+            text-align: center;
+        }
+
+        #footer {
+            width: 100%;
+            min-height: 5vh;
+            padding-top: 2vh;
+            padding-bottom: 2vh;
+            text-align: center;
+            line-height: 25px;
+            font-size: 13px;
+            position: relative;
+            z-index: 5;
+        }
+
+        #features {
+            padding-top: 10vh;
+            padding-bottom: 10vh;
+        }
+
+        .hidden {
+            visibility: hidden;
+        }
+
+        .centered {
+            width: 40vw;
+            margin: 0 auto;
+        }
+
+        .lefty {
+            width: 28vw;
+            margin-left: 4vw;
+        }
+
+        .righty {
+            width: 28vw;
+            margin-left: 68vw;
+        }
+
+        .fully {
+            width: 100%;
+            margin: auto;
+        }
+
+        .light {
+            color: #333;
+            background-color: rgba(250, 250, 250, 0.85);
+        }
+
+        .dark {
+            color: #fafafa;
+            background-color: rgba(50, 50, 50, 0.85);
+        }
+
+        /* Class copy: lighter panels. The panel waiting below the active one is faint,
+           the panels have rounded corners and a soft shadow, and the text has less padding. */
+        .step {
+            padding-bottom: 50vh;
+            opacity: 0.12;
+            transition: opacity 0.4s;
+            position: relative;   /* keeps the panels above the map at every opacity */
+            z-index: 1;
+            pointer-events: none;   /* the mouse works on the map around a panel */
+        }
+
+        .step div {
+            pointer-events: auto;   /* links and text in the panel still work with the mouse */
+        }
+
+        .step.active {
+            opacity: 1;
+        }
+
+        .step div {
+            padding: 8px 12px;
+            line-height: 1.45;
+            font-size: 14px;
+            border-radius: 6px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+        }
+
+        .step div h3 {
+            margin: 0 0 4px 0;
+            font-size: 16px;
+        }
+
+        .step div p {
+            margin: 0;
+        }
+
+        .step img {
+            width: 100%;
+        }
+
+        @media (max-width: 750px) {
+
+            .centered,
+            .lefty,
+            .righty,
+            .fully {
+                /* Room on the right for the + and − buttons */
+                width: calc(100vw - 72px);
+                margin: 0 0 0 16px;
+            }
+        }
+
+        /* Fix issue on mobile browser where scroll breaks */
+        .maplibregl-canvas-container.maplibregl-touch-zoom-rotate.maplibregl-touch-drag-pan,
+        .maplibregl-canvas-container.maplibregl-touch-zoom-rotate.maplibregl-touch-drag-pan .maplibregl-canvas {
+            touch-action: unset;
+        }
+
+        /* Inset minimap styles */
+        #inset-map {
+            position: fixed;
+            width: 130px;
+            height: 130px;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            z-index: 10;
+        }
+
+
+        /* A chapter's legend: a coloured square and its words on each line */
+        .legend {
+            margin: 6px 0 0 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .legend li {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            line-height: 1.6;
+        }
+
+        .legend span {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border-radius: 2px;
+            border: 1px solid rgba(0, 0, 0, 0.3);
+        }
+
+        #inset-map.top-left {
+            top: 10px;
+            left: 10px;
+        }
+
+        #inset-map.top-right {
+            top: 10px;
+            right: 10px;
+        }
+
+        #inset-map.bottom-left {
+            bottom: 30px;
+            left: 10px;
+        }
+
+        #inset-map.bottom-right {
+            bottom: 30px;
+            right: 10px;
+        }
+
+        /* A smaller overview map on a phone */
+        @media (max-width: 750px) {
+            #inset-map {
+                width: 96px;
+                height: 96px;
+            }
+
+            /* Above the map's credit line, which can take four lines on a phone */
+            #inset-map.bottom-right,
+            #inset-map.bottom-left {
+                bottom: 110px;
+            }
+        }
+
+        .inset-marker {
+            width: 12px;
+            height: 12px;
+            background-color: #ff6b6b;
+            border: 2px solid white;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        /* No hand cursor over the map, except in a chapter with exploreAllowed: true */
+        #map:not(.exploring) .maplibregl-canvas-container {
+            cursor: default;
+        }
+
+        /* The box that lists problems in config.js */
+        #problems {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 8px 16px;
+            background: #fff3f3;
+            border-bottom: 3px solid #c00000;
+            color: #600000;
+            font-family: sans-serif;
+            font-size: 15px;
+        }
+        #problems p {
+            margin: 4px 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="map"></div>
+    <div id="story"></div>
+
+    <script>
+        // Remember a typing error in config.js, so that the page can show it
+        window.addEventListener('error', function (event) {
+            if (event.filename && /config[^\/]*\.js/.test(event.filename)) {
+                window.configError = event.message + ' (config.js, line ' + event.lineno + ')';
+            }
+        });
+    </script>
+    <script src="./config.js"></script>
+    <script type="module">
+        import * as maplibregl from 'https://cdn.jsdelivr.net/npm/maplibre-gl@6.15.0/dist/maplibre-gl.mjs';
+
+        // You do not need to edit this file.
+        // Your settings, your layers (data and colours), your chapters and your own functions are all in config.js.
+
+        // A red box at the top of the page lists problems in config.js in plain words.
+        // Each problem is shown once, and also in the browser's console.
+        var problemsShown = [];
+        function showProblem(text) {
+            if (problemsShown.indexOf(text) !== -1) {
+                return;
+            }
+            problemsShown.push(text);
+            var box = document.getElementById('problems');
+            if (!box) {
+                box = document.createElement('div');
+                box.id = 'problems';
+                document.body.appendChild(box);
+            }
+            var line = document.createElement('p');
+            line.innerText = text;
+            box.appendChild(line);
+            console.error(text);
+        }
+
+        if (typeof config === 'undefined') {
+            showProblem('config.js has a typing error. The story cannot start. ' + (window.configError || ''));
+            throw new Error('The story stopped because of config.js.');
+        }
+
+        // A chapter's show can be a list, show: ["landuse"] (each layer fully visible),
+        // or a list with opacities, show: { landuse: 0.6 }. Without show, the chapter shows no layer.
+        function showList(chapter) {
+            var list = {};
+            if (Array.isArray(chapter.show)) {
+                chapter.show.forEach(function (id) {
+                    list[id] = 1;
+                });
+            } else if (chapter.show) {
+                list = chapter.show;
+            }
+            return list;
+        }
+
+        // The paint settings that make each type of layer more or less solid
+        var opacitySettings = {
+            'fill': ['fill-opacity'],
+            'line': ['line-opacity'],
+            'circle': ['circle-opacity', 'circle-stroke-opacity'],
+            'symbol': ['icon-opacity', 'text-opacity'],
+            'raster': ['raster-opacity'],
+            'fill-extrusion': ['fill-extrusion-opacity'],
+            'heatmap': ['heatmap-opacity'],
+            'hillshade': ['hillshade-exaggeration']
+        };
+
+        // The panel position for each alignment in config.js
+        var alignments = {
+            'left': 'lefty',
+            'center': 'centered',
+            'right': 'righty',
+            'full': 'fully'
+        };
+
+        // How long a layer takes to fade in or out, in milliseconds, when a chapter gives no fade
+        var defaultFade = 1500;
+
+        // A config.js from the older template has no layers list
+        if (!config.layers) {
+            config.layers = [];
+        }
+
+        // An extra comma in a list leaves an empty place in it. Leave such places out.
+        config.layers = config.layers.filter(function (item) { return item; });
+        config.chapters = config.chapters.filter(function (chapter) { return chapter; });
+
+        // Every layer that config.js lists, or that a chapter shows
+        var storyLayers = [];
+        config.layers.forEach(function (item) {
+            storyLayers.push(item.id);
+        });
+        config.chapters.forEach(function (chapter) {
+            for (var id in showList(chapter)) {
+                if (storyLayers.indexOf(id) === -1) {
+                    storyLayers.push(id);
+                }
+            }
+        });
+
+        // ============================================================
+        // 1. THE TEXT: the title, one panel for each chapter, the footer
+        // ============================================================
+
+        var story = document.getElementById('story');
+        var features = document.createElement('div');
+        features.setAttribute('id', 'features');
+
+        var header = document.createElement('div');
+
+        if (config.title) {
+            var titleText = document.createElement('h1');
+            titleText.innerText = config.title;
+            header.appendChild(titleText);
+        }
+
+        if (config.subtitle) {
+            var subtitleText = document.createElement('h2');
+            subtitleText.innerText = config.subtitle;
+            header.appendChild(subtitleText);
+        }
+
+        if (config.byline) {
+            var bylineText = document.createElement('p');
+            bylineText.innerText = config.byline;
+            header.appendChild(bylineText);
+        }
+
+        if (header.innerText.length > 0) {
+            header.classList.add(config.theme);
+            header.setAttribute('id', 'header');
+            story.appendChild(header);
+        }
+
+        config.chapters.forEach(function (record, index) {
+            var container = document.createElement('div');
+            var chapter = document.createElement('div');
+
+            if (record.title) {
+                var title = document.createElement('h3');
+                title.innerText = record.title;
+                chapter.appendChild(title);
+            }
+
+            if (record.image) {
+                var image = new Image();
+                image.src = record.image;
+                chapter.appendChild(image);
+            }
+
+            if (record.description) {
+                var text = document.createElement('p');
+                text.innerHTML = record.description;
+                chapter.appendChild(text);
+            }
+
+            // A legend: one line for each { color, label } in the chapter's legend list
+            if (record.legend) {
+                var legend = document.createElement('ul');
+                legend.className = 'legend';
+                record.legend.forEach(function (entry) {
+                    var line = document.createElement('li');
+                    var square = document.createElement('span');
+                    square.style.background = entry.color;
+                    line.appendChild(square);
+                    line.appendChild(document.createTextNode(entry.label));
+                    legend.appendChild(line);
+                });
+                chapter.appendChild(legend);
+            }
+
+            // Another web page shown in the panel (embed), with optional text after it (descriptionAfter)
+            if (record.embed) {
+                var frame = document.createElement('iframe');
+                frame.src = record.embed;
+                frame.title = record.title || 'An embedded page';
+                frame.style.width = '100%';
+                frame.style.height = (record.embedHeight || 300) + 'px';
+                frame.style.border = '0';
+                frame.style.marginTop = '8px';
+                // As in Vimeo's and YouTube's own embed code: full screen, picture-in-picture
+                frame.allow = 'autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share';
+                frame.allowFullscreen = true;
+                frame.referrerPolicy = 'strict-origin-when-cross-origin';
+                chapter.appendChild(frame);
+            }
+
+            if (record.descriptionAfter) {
+                var textAfter = document.createElement('p');
+                textAfter.innerHTML = record.descriptionAfter;
+                textAfter.style.marginTop = '8px';
+                chapter.appendChild(textAfter);
+            }
+
+            container.setAttribute('id', record.id || 'chapter-' + (index + 1));
+            container.classList.add('step');
+            if (index === 0) {
+                container.classList.add('active');
+            }
+
+            chapter.classList.add(config.theme);
+            container.appendChild(chapter);
+            container.classList.add(alignments[record.alignment] || 'centered');
+            if (record.hidden) {
+                container.classList.add('hidden');
+            }
+            features.appendChild(container);
+        });
+
+        story.appendChild(features);
+
+        var footer = document.createElement('div');
+
+        if (config.footer) {
+            var footerText = document.createElement('p');
+            footerText.innerHTML = config.footer;
+            footer.appendChild(footerText);
+        }
+
+        if (footer.innerText.length > 0) {
+            footer.classList.add(config.theme);
+            footer.setAttribute('id', 'footer');
+            story.appendChild(footer);
+        }
+
+        // ============================================================
+        // 2. THE MAP, the inset map and the marker
+        // ============================================================
+
+        var map = new maplibregl.Map({
+            container: 'map',
+            style: config.style,
+            center: config.chapters[0].location.center,
+            zoom: config.chapters[0].location.zoom,
+            bearing: config.chapters[0].location.bearing,
+            pitch: config.chapters[0].location.pitch,
+            // The message that MapLibre shows in a chapter with exploreAllowed: true
+            locale: {
+                'CooperativeGesturesHandler.WindowsHelpText': 'Use two fingers to move the map',
+                'CooperativeGesturesHandler.MacHelpText': 'Use two fingers to move the map',
+                'CooperativeGesturesHandler.MobileHelpText': 'Use two fingers to move the map'
+            }
+        });
+
+        // The reader can move and zoom the map only in a chapter with exploreAllowed: true.
+        // The mouse wheel, the arrow keys and the scroll bar always scroll the story.
+        ['scrollZoom', 'boxZoom', 'dragRotate', 'dragPan', 'keyboard', 'doubleClickZoom', 'touchZoomRotate', 'touchPitch'].forEach(function (name) {
+            map[name].disable();
+        });
+        map.touchZoomRotate.disableRotation();
+        var zoomButtons = new maplibregl.NavigationControl({ showCompass: false });
+        var exploring = false;
+
+        function setExplore(on) {
+            if (on === exploring) {
+                return;
+            }
+            exploring = on;
+            ['dragPan', 'doubleClickZoom', 'touchZoomRotate'].forEach(function (name) {
+                if (on) {
+                    map[name].enable();
+                } else {
+                    map[name].disable();
+                }
+            });
+            if (on) {
+                map.cooperativeGestures.enable();   // on a touch screen, one finger scrolls the story. Two fingers move the map.
+                map.addControl(zoomButtons, 'top-right');
+                document.getElementById('map').classList.add('exploring');
+            } else {
+                // MapLibre hides its "Use two fingers" message a moment after it shows it.
+                // The message is turned off after that moment, so MapLibre shows no error.
+                setTimeout(function () {
+                    if (!exploring) {
+                        map.cooperativeGestures.disable();
+                    }
+                }, 300);
+                map.removeControl(zoomButtons);
+                document.getElementById('map').classList.remove('exploring');
+            }
+        }
+
+        // Your own functions in config.js (see "Run your own code at a chapter" in README.md) can use map and maplibregl
+        window.map = map;
+        window.maplibregl = maplibregl;
+
+        var insetMap = null;
+        var insetMarker = null;
+
+        if (config.inset) {
+            var insetContainer = document.createElement('div');
+            insetContainer.id = 'inset-map';
+            insetContainer.classList.add(config.insetPosition || 'bottom-right');
+            document.body.appendChild(insetContainer);
+
+            insetMap = new maplibregl.Map({
+                container: 'inset-map',
+                style: config.insetStyle || 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+                center: config.chapters[0].location.center,
+                zoom: config.insetZoom || 1,
+                interactive: false,
+                attributionControl: false
+            });
+
+            var markerElement = document.createElement('div');
+            markerElement.className = 'inset-marker';
+            if (config.insetOptions && config.insetOptions.markerColor) {
+                markerElement.style.backgroundColor = config.insetOptions.markerColor;
+            }
+            insetMarker = new maplibregl.Marker({ element: markerElement });
+            insetMarker.setLngLat(config.chapters[0].location.center);
+            insetMarker.addTo(insetMap);
+        }
+
+        var marker = null;
+        if (config.showMarkers) {
+            marker = new maplibregl.Marker({ color: config.markerColor });
+            marker.setLngLat(config.chapters[0].location.center);
+            marker.addTo(map);
+        }
+
+        // ============================================================
+        // 3. THE LAYERS from config.js, each one invisible at first
+        // ============================================================
+
+        // The id of the basemap's first layer of icons or text, so a layer can go under the labels
+        function firstLabelLayer() {
+            var layers = map.getStyle().layers;
+            for (var i = 0; i < layers.length; i++) {
+                if (layers[i].type === 'symbol') {
+                    return layers[i].id;
+                }
+            }
+            return undefined;
+        }
+
+        // The filter of an outline layer: the feature under the mouse, or no feature.
+        // outline: true uses the number that the map gives each feature; a field name uses that field.
+        function outlineFilter(item, feature) {
+            if (item.outline === true) {
+                return ['==', ['id'], feature ? feature.id : -1];
+            }
+            return ['==', ['get', item.outline], feature ? feature.properties[item.outline] : ''];
+        }
+
+        function addStoryLayer(item) {
+            var below = undefined;
+            if (item.under === 'labels') {
+                below = firstLabelLayer();
+            }
+
+            // A layer with data or tiles gets its own source and layer.
+            // A layer with neither is already in the basemap style (see README.md).
+            if (item.data || item.tiles) {
+                if (!opacitySettings[item.type]) {
+                    showProblem('The layer "' + item.id + '" has the type "' + item.type + '". Use "fill", "line", "circle" or "raster".');
+                    return;
+                }
+                if (/github\.com\/.*\/blob\//.test(item.data || '')) {
+                    showProblem('The data address of the layer "' + item.id + '" is a GitHub page, not the file. Use the file\'s path in your repository, for example "./data/my-data.geojson".');
+                    return;
+                }
+                var sameId = config.layers.filter(function (other) { return other.id === item.id; });
+                if (sameId.length > 1) {
+                    showProblem('Two layers in the layers list have the id "' + item.id + '". Give each layer its own id.');
+                    return;
+                }
+                if (map.getLayer(item.id) || map.getSource(item.id)) {
+                    showProblem('The basemap already has a layer with the id "' + item.id + '". Give your layer another id in config.js, for example one that starts with my_.');
+                    return;
+                }
+                if (item.data) {
+                    map.addSource(item.id, { type: 'geojson', data: item.data, generateId: true });
+                } else {
+                    map.addSource(item.id, {
+                        type: 'raster',
+                        tiles: [item.tiles],
+                        tileSize: item.tileSize || 256,
+                        attribution: item.attribution || ''
+                    });
+                }
+                var paint = item.paint || {};
+                opacitySettings[item.type].forEach(function (setting) {
+                    paint[setting] = 0;   // invisible until a chapter shows it
+                });
+                map.addLayer({ id: item.id, type: item.type, source: item.id, paint: paint }, below);
+            }
+
+            // An outline that shows only the feature under the mouse (at first it shows none)
+            if (item.outline && map.getLayer(item.id)) {
+                var styleLayer = map.getLayer(item.id);
+                var outline = {
+                    id: item.id + '-outline',
+                    type: 'line',
+                    source: styleLayer.source,
+                    filter: outlineFilter(item, null),
+                    paint: { 'line-color': '#000000', 'line-width': 3 }
+                };
+                if (styleLayer.sourceLayer) {
+                    outline['source-layer'] = styleLayer.sourceLayer;
+                }
+                map.addLayer(outline);
+            }
+        }
+
+        // Make one layer more or less solid, over a number of milliseconds
+        function setOpacity(layerId, opacity, duration) {
+            var layer = map.getLayer(layerId);
+            if (!layer) {
+                return;   // the problem box already says why this layer is missing
+            }
+            opacitySettings[layer.type].forEach(function (setting) {
+                map.setPaintProperty(layerId, setting + '-transition', { duration: duration });
+                map.setPaintProperty(layerId, setting, opacity);
+            });
+        }
+
+        // Show the layers that a chapter names in its show list, and fade every other story layer out
+        function showChapterLayers(chapter) {
+            var fade = chapter.fade || defaultFade;
+            var list = showList(chapter);
+            storyLayers.forEach(function (id) {
+                var opacity = 0;
+                if (list[id] !== undefined) {
+                    opacity = list[id];
+                }
+                setOpacity(id, opacity, fade);
+            });
+        }
+
+        function isVisible(layerId) {
+            var layer = map.getLayer(layerId);
+            var setting = opacitySettings[layer.type][0];
+            return map.getPaintProperty(layerId, setting) > 0;
+        }
+
+        // ============================================================
+        // 4. THE POPUP: for a visible layer with a popup list in config.js,
+        //    outline the feature under the mouse and show its fields
+        // ============================================================
+
+        var popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
+
+        function clearHover() {
+            config.layers.forEach(function (item) {
+                if (item.outline && map.getLayer(item.id + '-outline')) {
+                    map.setFilter(item.id + '-outline', outlineFilter(item, null));
+                }
+            });
+            popup.remove();
+        }
+
+        function popupText(item, properties) {
+            item.popup.forEach(function (field) {
+                if (properties[field] === undefined) {
+                    showProblem('The popup of the layer "' + item.id + '" names the field "' + field + '". The data has no such field. The data\'s fields are: ' + Object.keys(properties).join(', ') + '.');
+                }
+            });
+            var html = '<strong>' + properties[item.popup[0]] + '</strong>';
+            var others = [];
+            for (var i = 1; i < item.popup.length; i++) {
+                others.push(properties[item.popup[i]]);
+            }
+            if (others.length > 0) {
+                html = html + '<br>' + others.join(', ');
+            }
+            return html;
+        }
+
+        // The story's scrolling panels lie on top of the map, so this listens to the whole page.
+        function onMouseMove(event) {
+            if (event.target.closest('.light, .dark')) {   // the mouse is over a story panel
+                clearHover();
+                return;
+            }
+            var rect = map.getCanvasContainer().getBoundingClientRect();
+            var point = [event.clientX - rect.left, event.clientY - rect.top];
+            for (var i = 0; i < config.layers.length; i++) {
+                var item = config.layers[i];
+                if (item.popup && map.getLayer(item.id) && isVisible(item.id)) {
+                    var found = map.queryRenderedFeatures(point, { layers: [item.id] });
+                    if (found.length > 0) {
+                        var properties = found[0].properties;
+                        clearHover();
+                        if (item.outline) {
+                            map.setFilter(item.id + '-outline', outlineFilter(item, found[0]));
+                        }
+                        popup.setLngLat(map.unproject(point));
+                        popup.setHTML(popupText(item, properties));
+                        popup.addTo(map);
+                        return;
+                    }
+                }
+            }
+            clearHover();
+        }
+
+        // ============================================================
+        // 5. BASEMAP ADJUSTMENTS for the OpenFreeMap Liberty style
+        // ============================================================
+
+        // The basemap draws trail numbers (on paths and tracks) in the same boxes as road numbers.
+        // Keep the boxes on roads only, and show the trails' names instead, from zoom 13
+        // (the basemap shows path names only from zoom 15.5).
+        function adjustBasemap() {
+            if (map.getLayer('highway-name-path')) {
+                map.setLayerZoomRange('highway-name-path', 13, 24);
+            }
+            ['highway-shield-non-us', 'highway-shield-us-interstate', 'road_shield_us'].forEach(function (id) {
+                if (map.getLayer(id)) {
+                    map.setFilter(id, ['all', map.getFilter(id), ['!', ['match', ['get', 'class'], ['path', 'track'], true, false]]]);
+                }
+            });
+        }
+
+        // ============================================================
+        // 6. SCROLLING: when a panel reaches the middle of the screen,
+        //    the map moves to its chapter and shows its layers
+        // ============================================================
+
+
+        // A chapter can have its own basemap style (its style setting).
+        // Chapters without one use the style at the top of config.js.
+        var currentStyle = config.style;
+
+        // When the style changes, copy the story's layers (and their sources) from the old style into the new one.
+        // A layer with under: 'labels' goes under the new style's first layer of icons or text.
+        function keepStoryLayers(previous, next) {
+            var sources = Object.assign({}, next.sources);
+            var layers = next.layers.slice();
+            var firstSymbol = layers.findIndex(function (layer) { return layer.type === 'symbol'; });
+            previous.layers.forEach(function (layer) {
+                // A story layer has a source with its own id (see addStoryLayer)
+                var item = config.layers.find(function (it) { return it.id === layer.source && (it.id === layer.id || it.id + '-outline' === layer.id); });
+                if (!item) {
+                    return;   // a layer of the old basemap: leave it behind
+                }
+                if (next.layers.some(function (other) { return other.id === layer.id; })) {
+                    showProblem('The style "' + (next.name || currentStyle) + '" already has a layer with the id "' + layer.id + '". Give your layer another id in config.js, for example one that starts with my_.');
+                    return;
+                }
+                sources[layer.source] = previous.sources[layer.source];
+                if (item.under === 'labels' && firstSymbol !== -1) {
+                    layers.splice(firstSymbol, 0, layer);
+                    firstSymbol = firstSymbol + 1;
+                } else {
+                    layers.push(layer);
+                }
+            });
+            return Object.assign({}, next, { sources: sources, layers: layers });
+        }
+
+        // Change to the chapter's style if it is not the one on the map, then run whenDone
+        function useChapterStyle(chapter, whenDone) {
+            var wanted = chapter.style || config.style;
+            if (wanted === currentStyle) {
+                whenDone();
+                return;
+            }
+            currentStyle = wanted;
+            map.once('style.load', function () {
+                adjustBasemap();
+                whenDone();
+            });
+            map.setStyle(wanted, { transformStyle: keepStoryLayers });
+        }
+
+        var currentChapter = null;   // the chapter the reader is in
+
+        function onChapterEnter(response) {
+            var index = response.index;
+            var chapter = config.chapters[index];
+
+            // scrollama can report the same chapter again when its panel changes size.
+            // The reader has not left the chapter. The map stays where the reader put it.
+            if (index === currentChapter) {
+                return;
+            }
+            currentChapter = index;
+            document.querySelectorAll('.step.active').forEach(function (step) {
+                step.classList.remove('active');
+            });
+            response.element.classList.add('active');
+            setExplore(chapter.exploreAllowed === true);
+
+            var move = chapter.mapAnimation || 'flyTo';
+            if (['flyTo', 'easeTo', 'jumpTo'].indexOf(move) === -1) {
+                showProblem('Chapter ' + (index + 1) + ' has mapAnimation: "' + move + '". Use "flyTo", "easeTo" or "jumpTo".');
+                move = 'flyTo';
+            }
+            if (!chapter.location) {
+                showProblem('Chapter ' + (index + 1) + ' ("' + (chapter.title || '') + '") has no location.');
+            } else {
+                map[move](Object.assign({ pitch: 0, bearing: 0 }, chapter.location));
+            }
+
+            if (marker && chapter.location) {
+                marker.setLngLat(chapter.location.center);
+                // showMarker: false hides the marker in this chapter
+                marker.getElement().style.display = chapter.showMarker === false ? 'none' : '';
+            }
+            // showInset: false hides the small overview map in this chapter
+            if (insetMap) {
+                document.getElementById('inset-map').style.display = chapter.showInset === false ? 'none' : '';
+            }
+            if (insetMap && insetMarker && chapter.location) {
+                insetMap.setCenter(chapter.location.center);
+                insetMarker.setLngLat(chapter.location.center);
+            }
+
+            useChapterStyle(chapter, function () {
+                showChapterLayers(chapter);
+            });
+            // Chapters written for the older template can still list onChapterEnter
+            if (chapter.onChapterEnter) {
+                chapter.onChapterEnter.forEach(function (entry) {
+                    setOpacity(entry.layer, entry.opacity, entry.duration || 300);
+                });
+            }
+            if (chapter.callback) {
+                if (typeof window[chapter.callback] === 'function') {
+                    window[chapter.callback]();
+                } else {
+                    showProblem('Chapter ' + (index + 1) + ' has callback: "' + chapter.callback + '". config.js has no function with that name.');
+                }
+            }
+            if (chapter.rotateAnimation) {
+                map.once('moveend', function () {
+                    var bearing = map.getBearing();
+                    map.rotateTo(bearing + 180, {
+                        duration: 30000,
+                        easing: function (t) { return t; }
+                    });
+                });
+            }
+            if (config.auto) {
+                var next = (index + 1) % config.chapters.length;
+                map.once('moveend', function () {
+                    document.querySelectorAll('[data-scrollama-index="' + next + '"]')[0].scrollIntoView();
+                });
+            }
+        }
+
+        function onChapterExit(response) {
+            var chapter = config.chapters[response.index];
+            if (response.index === currentChapter) {
+                currentChapter = null;
+            }
+            response.element.classList.remove('active');
+            // Chapters written for the older template can still list onChapterExit
+            if (chapter.onChapterExit) {
+                chapter.onChapterExit.forEach(function (entry) {
+                    setOpacity(entry.layer, entry.opacity, entry.duration || 300);
+                });
+            }
+        }
+
+        // scrollama is the small library that watches the panels
+        var scroller = scrollama();
+
+        // Show the map's errors about config.js in the problem box
+        map.on('error', function (event) {
+            var error = event.error || {};
+            var message = error.message || String(error);
+            var url = (error.url || '').split('?')[0];
+            if (error.status === 404 && /\.(geo)?json$/.test(url)) {
+                var whose = event.sourceId ? 'The file of the layer "' + event.sourceId + '" was not found: ' : 'A file was not found: ';
+                showProblem(whose + error.url + '. Check its path in config.js. The capital letters must match the file\'s name and folder.');
+            } else if (/^layers\./.test(message)) {
+                showProblem(message + '. A layer\'s paint must fit its type (see "Add your own data" in README.md).');
+            } else if (/JSON/.test(message)) {
+                showProblem('A style or data file could not be read: ' + message + '. Check the commas, brackets and quote marks of the style files and GeoJSON files named in config.js.');
+            } else {
+                console.error(error);   // other map errors, for example a tile that did not load
+            }
+        });
+
+        map.on('load', function () {
+            adjustBasemap();
+            config.layers.forEach(function (item) {
+                try {
+                    addStoryLayer(item);
+                } catch (error) {
+                    showProblem('The layer "' + item.id + '" could not be added: ' + error.message);
+                }
+            });
+
+            // Show the first chapter's style and layers at once, before the reader scrolls
+            useChapterStyle(config.chapters[0], function () {
+                showChapterLayers(config.chapters[0]);
+            });
+
+            // A layer needs data or tiles, unless the basemap already has a layer with its id
+            config.layers.forEach(function (item) {
+                if (!item.data && !item.tiles && !map.getLayer(item.id)) {
+                    showProblem('The layer "' + item.id + '" has no data and no tiles. Check the spelling of data or tiles in config.js.');
+                }
+            });
+
+            // A name in a show list must be the id of a layer in the layers list
+            config.chapters.forEach(function (chapter, index) {
+                for (var id in showList(chapter)) {
+                    var known = config.layers.some(function (item) { return item.id === id; });
+                    if (!known && !map.getLayer(id)) {
+                        showProblem('Chapter ' + (index + 1) + ' ("' + (chapter.title || '') + '") shows "' + id + '". The layers list has no layer with this id. The capital letters must match.');
+                    }
+                }
+            });
+
+            if (config.use3dTerrain) {
+                map.addSource('terrain-dem', {
+                    'type': 'raster-dem',
+                    'url': config.terrainSource || 'https://demotiles.maplibre.org/terrain-tiles/tiles.json',
+                    'tileSize': 256
+                });
+                map.setTerrain({
+                    'source': 'terrain-dem',
+                    'exaggeration': config.terrainExaggeration || 1.5
+                });
+                if (map.getLayer('sky') === undefined) {
+                    map.addLayer({
+                        'id': 'sky',
+                        'type': 'sky',
+                        'paint': {
+                            'sky-type': 'atmosphere',
+                            'sky-atmosphere-sun': [0.0, 90.0],
+                            'sky-atmosphere-sun-intensity': 15
+                        }
+                    });
+                }
+            }
+
+            document.addEventListener('mousemove', onMouseMove);
+            window.addEventListener('scroll', clearHover);   // scrolling to another chapter hides the outline and the popup
+
+            scroller.setup({ step: '.step', offset: 0.5, progress: true });
+            scroller.onStepEnter(onChapterEnter);
+            scroller.onStepExit(onChapterExit);
+
+            if (config.auto) {
+                document.querySelectorAll('[data-scrollama-index="0"]')[0].scrollIntoView();
+            }
+        });
+
+        window.addEventListener('resize', scroller.resize);
+    </script>
+
+</body>
+
+</html>

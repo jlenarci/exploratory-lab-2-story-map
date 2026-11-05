@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Elevation and the colours of the imagery</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 12px;
+            color: #222222;
+            background: #ffffff;
+        }
+
+        #saturation-control {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin: 2px 0 4px 0;
+        }
+
+        #saturation {
+            flex: 1;
+            min-width: 0;
+        }
+
+        /* Room for "−100 %", so the slider keeps its width as the value changes */
+        #saturation-value {
+            min-width: 4em;
+            text-align: right;
+        }
+
+        #status {
+            margin: 2px 0 6px 0;
+            color: #555555;
+        }
+
+        #chart {
+            display: grid;
+            grid-template-columns: 78px repeat(5, 1fr);
+            gap: 2px;
+        }
+
+        /* Each elevation is a small button: move the mouse over it (or tap it) */
+        .label {
+            padding: 0 6px;
+            text-align: right;
+            white-space: nowrap;
+            line-height: 18px;
+            border: 1px solid #8a94a6;
+            border-radius: 4px;
+            background: #eef1f6;
+            cursor: pointer;
+        }
+
+        .label:hover {
+            background: #2f4a7a;
+            border-color: #2f4a7a;
+            color: #ffffff;
+        }
+
+        .cell {
+            height: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            font-size: 9px;
+            white-space: nowrap;
+        }
+
+        /* The colour under the mouse (or tapped) shows its hex code, for example #4a5d3b */
+        .cell.coloured:hover::after {
+            content: attr(data-hex);
+            letter-spacing: -0.3px;   /* so the code fits inside the black outline in a phone's narrow cells */
+        }
+
+        /* A thin grey edge, so a very light colour is not mistaken for an empty cell */
+        .cell.coloured {
+            box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.25);
+        }
+
+        .cell:hover {
+            outline: 2px solid #000000;
+            outline-offset: -2px;
+        }
+    </style>
+</head>
+
+<body>
+    <label id="saturation-control">Saturation of the imagery:
+        <input type="range" id="saturation" min="-100" max="100" step="10" value="60">
+        <span id="saturation-value">+60 %</span>
+    </label>
+    <div id="status">Reading the map…</div>
+    <div id="chart"></div>
+
+    <script>
+        // This page is shown in a chapter of the story (embed: "./elevation-colours.html").
+        // It reads the story's map, because both pages come from the same website.
+        // For the map's current view, it fetches the satellite imagery and the elevation tiles.
+        // It samples both every few pixels.
+        // The chart is a grid. Each row is a range of elevation. Each column is one of the row's
+        // most common colours of the imagery, chosen to differ from each other.
+        // Moving the mouse over a row's label or a cell washes out the other pixels of the map
+        // (covers them with white).
+        // The slider changes the saturation of the imagery (how strong its colours are), on the map and in the chart.
+
+        var map = window.parent.map;
+        var parentDocument = window.parent.document;
+
+        var STEP = 4;   // one sample for each 4 × 4 screen pixels
+        var IMAGERY = 'https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2024_3857/default/g/{z}/{y}/{x}.jpg';
+        var ELEVATION = 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png';
+        var COLOURS = 5;            // colours in each row (the columns of the grid)
+        var MIN_DIFFERENCE = 60;    // the smallest difference between two chosen colours of a row
+        var COLOUR_DISTANCE = MIN_DIFFERENCE / 2;   // how close a pixel's colour must be to the colour under the mouse
+                                                    // (half of MIN_DIFFERENCE, so no pixel is close to two colours of a row)
+        var IMAGERY_LAYER = 'satellite';   // the id of the imagery layer in satellite-style.json
+
+        var samples = [];   // { x, y, elevation, r, g, b, imageryR, imageryG, imageryB, band }
+                            // imageryR, imageryG, imageryB: the colour in the imagery tile. r, g, b: that colour with the slider's saturation applied.
+        var tiles = {};     // tile pixels, kept once they are loaded
+
+        // Is this page's chapter the active one?
+        function chapterIsActive() {
+            var step = window.frameElement && window.frameElement.closest('.step');
+            return step && step.classList.contains('active');
+        }
+
+        // ---------- tiles ----------
+
+        function tileUrl(pattern, z, x, y) {
+            return pattern.replace('{z}', z).replace('{x}', x).replace('{y}', y);
+        }
+
+        function loadTile(url) {
+            if (!tiles[url]) {
+                tiles[url] = fetch(url, { mode: 'cors' })
+                    .then(function (response) { return response.blob(); })
+                    .then(function (blob) { return createImageBitmap(blob); })
+                    .then(function (bitmap) {
+                        var canvas = new OffscreenCanvas(256, 256);
+                        var context = canvas.getContext('2d');
+                        context.drawImage(bitmap, 0, 0, 256, 256);
+                        return context.getImageData(0, 0, 256, 256).data;
+                    });
+            }
+            return tiles[url];
+        }
+
+        // The world pixel of a longitude and latitude at zoom z (256-pixel tiles, Web Mercator)
+        function worldPixel(lngLat, z) {
+            var size = 256 * Math.pow(2, z);
+            var latitude = lngLat.lat * Math.PI / 180;
+            var x = (lngLat.lng + 180) / 360 * size;
+            var y = (1 - Math.log(Math.tan(latitude) + 1 / Math.cos(latitude)) / Math.PI) / 2 * size;
+            return [x, y];
+        }
+
+        // Terrarium tiles store elevation in metres as red × 256 + green + blue / 256 − 32768.
+        // Between pixel centres, the elevation is interpolated from the four nearest pixels (bilinear interpolation).
+        // The edges of a band then follow the ground more smoothly.
+        function elevationAt(dem, x, y) {
+            function pixel(px, py) {
+                px = Math.max(0, Math.min(255, px));
+                py = Math.max(0, Math.min(255, py));
+                var j = (py * 256 + px) * 4;
+                return dem[j] * 256 + dem[j + 1] + dem[j + 2] / 256 - 32768;
+            }
+            var x0 = Math.floor(x - 0.5);
+            var y0 = Math.floor(y - 0.5);
+            var fx = x - 0.5 - x0;
+            var fy = y - 0.5 - y0;
+            var top = pixel(x0, y0) * (1 - fx) + pixel(x0 + 1, y0) * fx;
+            var bottom = pixel(x0, y0 + 1) * (1 - fx) + pixel(x0 + 1, y0 + 1) * fx;
+            return top * (1 - fy) + bottom * fy;
+        }
+
+        // ---------- sampling ----------
+
+        var run = 0;
+
+        async function update() {
+            if (!map || !chapterIsActive()) {
+                return;
+            }
+            run = run + 1;
+            var thisRun = run;
+            clearWash();
+            paintMap(saturation);   // the imagery layer may have loaded only after the reader entered the chapter (onChapterChange then found no layer to change)
+            document.getElementById('status').innerText = 'Reading the map…';
+
+            var canvas = map.getCanvas();
+            var width = canvas.clientWidth;
+            var height = canvas.clientHeight;
+            var imageryZoom = Math.max(0, Math.min(16, Math.round(map.getZoom())));
+            var elevationZoom = Math.max(0, Math.min(15, Math.round(map.getZoom())));
+
+            // Where each sample falls in the imagery tiles and the elevation tiles
+            var points = [];
+            var urls = {};
+            for (var y = 0; y < height; y = y + STEP) {
+                for (var x = 0; x < width; x = x + STEP) {
+                    var lngLat = map.unproject([x + STEP / 2, y + STEP / 2]);
+                    var a = worldPixel(lngLat, imageryZoom);
+                    var b = worldPixel(lngLat, elevationZoom);
+                    var point = {
+                        x: x, y: y,
+                        imageryUrl: tileUrl(IMAGERY, imageryZoom, Math.floor(a[0] / 256), Math.floor(a[1] / 256)),
+                        imageryIndex: (Math.floor(a[1]) % 256) * 256 + (Math.floor(a[0]) % 256),
+                        elevationUrl: tileUrl(ELEVATION, elevationZoom, Math.floor(b[0] / 256), Math.floor(b[1] / 256)),
+                        elevationX: b[0] - Math.floor(b[0] / 256) * 256,   // the position inside the elevation tile
+                        elevationY: b[1] - Math.floor(b[1] / 256) * 256
+                    };
+                    urls[point.imageryUrl] = true;
+                    urls[point.elevationUrl] = true;
+                    points.push(point);
+                }
+            }
+
+            var loaded = {};
+            try {
+                await Promise.all(Object.keys(urls).map(function (url) {
+                    return loadTile(url).then(function (pixels) { loaded[url] = pixels; });
+                }));
+            } catch (error) {
+                document.getElementById('status').innerText = 'The tiles could not be read.';
+                return;
+            }
+            if (thisRun !== run) {
+                return;   // the map moved again while the tiles loaded
+            }
+
+            samples = points.map(function (p) {
+                var image = loaded[p.imageryUrl];
+                var dem = loaded[p.elevationUrl];
+                var i = p.imageryIndex * 4;
+                var elevation = elevationAt(dem, p.elevationX, p.elevationY);
+                return { x: p.x, y: p.y, elevation: elevation, imageryR: image[i], imageryG: image[i + 1], imageryB: image[i + 2] };
+            });
+            applySaturation();
+            drawChart();
+        }
+
+        // ---------- saturation ----------
+
+        var START_SATURATION = 60;           // the slider's value each time the reader enters this chapter
+        var saturation = START_SATURATION;   // the slider's value: −100 % to +100 %
+
+        // A positive saturation moves a sample's colour away from its grey (the average of its red, green and blue).
+        // A negative value moves it toward its grey.
+        // At 100 %, it is twice as far from its grey (but red, green and blue stay between 0 and 255). At −100 %, it is its grey.
+        // The map's raster-saturation does the same, so the chart's colours are the colours on the map.
+        function applySaturation() {
+            var factor = 1 + saturation / 100;
+            samples.forEach(function (s) {
+                var grey = (s.imageryR + s.imageryG + s.imageryB) / 3;
+                s.r = Math.max(0, Math.min(255, Math.round(grey + (s.imageryR - grey) * factor)));
+                s.g = Math.max(0, Math.min(255, Math.round(grey + (s.imageryG - grey) * factor)));
+                s.b = Math.max(0, Math.min(255, Math.round(grey + (s.imageryB - grey) * factor)));
+            });
+        }
+
+        // MapLibre's raster-saturation runs from −1 to 1. This function gives the raster-saturation that matches the slider's value.
+        // MapLibre's own formula uses 1.001 in place of 1, so that it never divides by zero.
+        function rasterSaturation(percent) {
+            return percent <= 0 ? percent / 100 : 1.001 - 1 / (1 + percent / 100);
+        }
+
+        function showSaturation() {
+            document.getElementById('saturation').value = saturation;
+            document.getElementById('saturation-value').innerText = (saturation > 0 ? '+' : saturation < 0 ? '−' : '') + Math.abs(saturation) + ' %';
+        }
+
+        function paintMap(percent) {
+            if (map && map.getLayer(IMAGERY_LAYER)) {
+                map.setPaintProperty(IMAGERY_LAYER, 'raster-saturation', rasterSaturation(percent));
+            }
+        }
+
+        function setSaturation(percent) {
+            saturation = percent;
+            showSaturation();
+            paintMap(percent);
+        }
+
+        document.getElementById('saturation').addEventListener('input', function (event) {
+            if (!chapterIsActive()) {
+                showSaturation();   // the map is in another chapter, so the slider goes back to its last value in this chapter
+                return;
+            }
+            setSaturation(Number(event.target.value));
+            clearWash();
+            if (samples.length > 0) {
+                applySaturation();
+                drawChart();
+            }
+        });
+
+        // Chapters three, five and six use the same style as this chapter. The story does not load that style again between them.
+        // Without this function, the saturation would stay on the map in those chapters.
+        // When the reader leaves this chapter, the map's imagery goes back to its own colours.
+        // Each time the reader enters this chapter, the slider starts at START_SATURATION.
+        function onChapterChange() {
+            if (chapterIsActive()) {
+                setSaturation(START_SATURATION);
+                if (samples.length > 0) {
+                    applySaturation();
+                    drawChart();
+                }
+            } else {
+                paintMap(0);
+            }
+        }
+
+        // ---------- the chart ----------
+
+        var bands = [];
+
+        function drawChart() {
+            var land = samples.filter(function (s) { return s.elevation >= 0; });
+            var top = Math.max.apply(null, land.map(function (s) { return s.elevation; }).concat([1]));
+            var steps = [1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000];
+            var step = steps.find(function (s) { return Math.ceil(top / s) <= 8; }) || 1000;
+
+            // The lowest band takes every sample below its top, including those below sea level
+            bands = [];
+            for (var low = 0; low < top; low = low + step) {
+                var label = low === 0 ? 'below ' + step + ' m' : low + '–' + (low + step) + ' m';
+                bands.push({ low: low, high: low + step, label: label, samples: [] });
+            }
+            samples.forEach(function (s) {
+                var index = Math.max(0, Math.min(bands.length - 1, Math.floor(s.elevation / step)));
+                bands[index].samples.push(s);
+                s.band = bands[index];
+            });
+
+            // The most common colours of each band. Colours are first grouped in 16 levels
+            // of red, green and blue. The commonest group is chosen first. Each next group must
+            // differ from every group already chosen by at least MIN_DIFFERENCE.
+            bands.forEach(function (band) {
+                var groups = {};
+                band.samples.forEach(function (s) {
+                    var key = (s.r >> 4) + ',' + (s.g >> 4) + ',' + (s.b >> 4);
+                    if (!groups[key]) {
+                        groups[key] = { count: 0, r: 0, g: 0, b: 0 };
+                    }
+                    var group = groups[key];
+                    group.count = group.count + 1;
+                    group.r = group.r + s.r;
+                    group.g = group.g + s.g;
+                    group.b = group.b + s.b;
+                });
+                var ranked = Object.values(groups)
+                    .sort(function (p, q) { return q.count - p.count; })
+                    .map(function (group) {
+                        return {
+                            r: Math.round(group.r / group.count),
+                            g: Math.round(group.g / group.count),
+                            b: Math.round(group.b / group.count),
+                            share: group.count / band.samples.length
+                        };
+                    });
+                band.colours = [];
+                ranked.forEach(function (colour) {
+                    var different = band.colours.every(function (chosen) {
+                        return difference(colour, chosen) >= MIN_DIFFERENCE;
+                    });
+                    if (different && band.colours.length < COLOURS) {
+                        band.colours.push(colour);
+                    }
+                });
+            });
+
+            var chart = document.getElementById('chart');
+            chart.innerHTML = '';
+            bands.slice().reverse().forEach(function (band) {
+                if (band.samples.length === 0) {
+                    return;
+                }
+                var label = document.createElement('div');
+                label.className = 'label';
+                label.innerText = band.label;
+                label.addEventListener('mouseenter', function () { wash(band, null); });
+                label.addEventListener('click', function () { wash(band, null); });   // a tap on a touch screen
+                label.addEventListener('mouseleave', clearWash);
+                chart.appendChild(label);
+                for (var k = 0; k < COLOURS; k++) {
+                    var cell = document.createElement('div');
+                    cell.className = 'cell';
+                    var colour = band.colours[k];
+                    if (colour) {
+                        cell.classList.add('coloured');
+                        cell.style.background = 'rgb(' + colour.r + ',' + colour.g + ',' + colour.b + ')';
+                        var hex = '#' + [colour.r, colour.g, colour.b].map(function (v) { return v.toString(16).padStart(2, '0'); }).join('');
+                        cell.dataset.hex = hex;
+                        cell.style.color = colour.r * 0.299 + colour.g * 0.587 + colour.b * 0.114 > 140 ? '#000000' : '#ffffff';   // black text on a light colour, white on a dark one
+                        cell.title = hex + ': ' + Math.round(colour.share * 100) + ' % of this row';
+                        cell.addEventListener('mouseenter', wash.bind(null, band, colour));
+                        cell.addEventListener('click', wash.bind(null, band, colour));   // a tap on a touch screen
+                        cell.addEventListener('mouseleave', clearWash);
+                    }
+                    chart.appendChild(cell);
+                }
+            });
+            document.getElementById('status').innerText = 'Move the mouse over an elevation or a colour, or tap one (' + samples.length + ' samples in this view):';
+            fitFrame();
+        }
+
+        // Make this page's box in the story's panel as tall as the chart. The panel then has no empty space under the chart.
+        function fitFrame() {
+            if (window.frameElement) {
+                window.frameElement.style.height = Math.ceil(document.body.getBoundingClientRect().height + 4) + 'px';
+            }
+        }
+
+        // ---------- washing out the map ----------
+
+        function washCanvas() {
+            var canvas = parentDocument.getElementById('washout');
+            if (!canvas) {
+                canvas = parentDocument.createElement('canvas');
+                canvas.id = 'washout';
+                canvas.style.position = 'absolute';
+                canvas.style.top = '0';
+                canvas.style.left = '0';
+                canvas.style.pointerEvents = 'none';
+                map.getContainer().appendChild(canvas);
+            }
+            var mapCanvas = map.getCanvas();
+            canvas.width = mapCanvas.clientWidth;
+            canvas.height = mapCanvas.clientHeight;
+            canvas.style.width = mapCanvas.clientWidth + 'px';
+            canvas.style.height = mapCanvas.clientHeight + 'px';
+            return canvas;
+        }
+
+        // The difference between two colours: the straight-line distance in red, green and blue
+        function difference(p, q) {
+            var dr = p.r - q.r;
+            var dg = p.g - q.g;
+            var db = p.b - q.b;
+            return Math.sqrt(dr * dr + dg * dg + db * db);
+        }
+
+        // Cover with white every sample outside the band, or (with a colour) far from that colour.
+        // The white is drawn as one pixel for each sample. Then it is stretched over the map. Its edges are then soft.
+        function wash(band, colour) {
+            if (!chapterIsActive()) {
+                return;   // the chart's chapter is not the one on the map
+            }
+            var canvas = washCanvas();
+            var columns = Math.ceil(canvas.width / STEP);
+            var rows = Math.ceil(canvas.height / STEP);
+            var small = new OffscreenCanvas(columns, rows);
+            var smallContext = small.getContext('2d');
+            smallContext.fillStyle = 'rgba(255, 255, 255, 0.85)';
+            samples.forEach(function (s) {
+                var keep = s.band === band;
+                if (keep && colour) {
+                    keep = difference(s, colour) < COLOUR_DISTANCE;
+                }
+                if (!keep) {
+                    smallContext.fillRect(s.x / STEP, s.y / STEP, 1, 1);
+                }
+            });
+            var context = canvas.getContext('2d');
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            context.imageSmoothingEnabled = true;
+            context.drawImage(small, 0, 0, columns * STEP, rows * STEP);
+        }
+
+        function clearWash() {
+            var canvas = parentDocument.getElementById('washout');
+            if (canvas) {
+                canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+            }
+        }
+
+        // ---------- when to read the map again ----------
+
+        if (map) {
+            map.on('movestart', clearWash);
+            map.on('moveend', update);
+            window.parent.addEventListener('scroll', clearWash);
+            // When the story loads this chapter's style, the imagery layer is new. It gets the slider's saturation.
+            map.on('style.load', function () {
+                if (chapterIsActive()) {
+                    paintMap(saturation);
+                }
+            });
+            // The story marks the active chapter's panel with the class "active".
+            // When the class of this page's panel changes, onChapterChange checks whether this chapter is active.
+            var step = window.frameElement && window.frameElement.closest('.step');
+            if (step) {
+                new MutationObserver(onChapterChange).observe(step, { attributes: true, attributeFilter: ['class'] });
+            }
+            update();
+        } else {
+            document.getElementById('status').innerText = 'This page works only inside the story.';
+        }
+    </script>
+</body>
+
+</html>
