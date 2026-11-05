@@ -64,19 +64,27 @@ var config = {
         {
             alignment: "full",
             title: "UBC through time 1920-2018",
-            <h3>1920-Before Campus Opened<h3>
-            description: "Before UBC's Point Grey campus officially opened in 1925, the landscape looked significantly different then it does today. This aerial photograph shows the first buildings, a starting point to the small city that UBC is today.",
-            image: "./1920_aerial.png",
+            
+            description:
+                 <h3>1920 — Before the Campus Opened</h3>
+                 <img src="./1920_aerial.png" style="width:100%; height:auto;">
+                 <p>Before UBC's Point Grey campus opened in 1925, the landscape looked significantly different from today.</p>
+
+                <h3>1970 — Campus Expansion</h3>
+                <img src="./1970_aerial.png" style="width:100%; height:auto;">
+                <p>By 1970, UBC had developed into a much larger campus including multiple academic, residential and recreational buildings.</p>
+
+                <h3>2018 — The Modern Campus</h3>
+                <img src="./2018_aerial.png" style="width:100%; height:auto;">
+                <p>By 2018 extensive development had occured throughout the campus.</p>
+
+                <p><small>Image Source: UBC Campus & Community Planning, History of Campus Planning.</small></p>
+                  `,
+                
             location: { center: [-123.245, 49.26], zoom: 13, pitch: 0, bearing: 0 },
             // The legend: the colours of the landuse layer's paint, with their meaning
-            legend: [
-                { color: "#1b9e77", label: "Existing" },
-                { color: "#d95f02", label: "Expansion" },
-                { color: "#7570b3", label: "2050" },
-                { color: "#e7298a", label: "Future 2050+" }
             ],
             // The layer landuse, at opacity 0.6. (show: ["landuse"] would show it fully.)
-            show: { landuse: 0.6 },
             // The reader can move and zoom the map in this chapter
             exploreAllowed: true
         },
