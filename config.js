@@ -65,18 +65,26 @@ var config = {
             alignment: "full",
             title: "UBC through time 1920-2018",
             description: [
+                "<div style='display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:12px; width:100%;'>",
+
+                "<div>",
                 "<h3>1920 — Before the Campus Opened</h3>",
                 "<img src='./1920_aerial.png' style='width:100%; height:auto;'>",
                 "<p>Before UBC's Point Grey campus opened in 1925, the landscape looked significantly different from today.</p>",
+                "<div>",
 
+                "<div>",
                 "<h3>1970 — Campus Expansion</h3>",
                 "<img src='./1970_aerial.png' style='width:100%; height:auto;'>",
                 "<p>By 1970, UBC had developed into a much larger campus with more academic, residential and recreational buildings.</p>",
+                "<div>",
 
+                "<div>",
                 "<h3>2018 — The Modern Campus</h3>",
                 "<img src='./2018_aerial.png' style='width:100%; height:auto;'>",
                 "<p>By 2018, extensive development had occurred throughout the campus.</p>",
 
+                "<div>",
                 "<p><small>Source: UBC Campus & Community Planning, History of Campus Planning.</small></p>"
             ].join(""),
                 
