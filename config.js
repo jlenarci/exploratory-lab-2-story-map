@@ -53,7 +53,7 @@ var config = {
         {
             id: "my_developments",
             type: "circle",
-            data: "./campus_developments.geojson",
+            data: "./campus_developments.json",
             paint: {
                 "circle-color": "#e67e22",
                 "circle-radius": 10,
