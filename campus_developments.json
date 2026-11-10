@@ -1,0 +1,38 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Main Mall",
+        "change": "Transformation into a pedestrian-focused greenway"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-123.2530, 49.2649]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Wesbrook Village",
+        "change": "Development of residential housing, shops, and community spaces"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-123.2315, 49.2522]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "University Boulevard",
+        "change": "Development of student facilities and public gathering spaces"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-123.24354, 49.26658]
+      }
+    }
+  ]
+}
