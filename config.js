@@ -49,7 +49,7 @@ var config = {
             popup: ["NAME", "LANDUSE", "OTHER"],
             // A black outline around the area under the mouse
             outline: true
-        }
+        },
         {
             id: "my_developments",
             type: "circle",
@@ -105,7 +105,7 @@ exploreAllowed: true
     alignment: "left",
     title: "Major Campus Developments",
             description: "Throughout the past century, UBC has experienced many changes to its built environment. Explore three areas of the campus- Main Mall, Wesbrook Village and University Boulevard- that have undergone sgnificant change.",
-            location: { center: [-123.2639, 49.2670], zoom: 14, pitch: 30, bearing: 40 },
+            location: { center: [-123.245, 49.26], zoom: 13.5, pitch: 0, bearing: 0 },
             // This chapter's own style, in place of the style at the top
         show: ["my_developments"],
           exploreAllowed: true,
