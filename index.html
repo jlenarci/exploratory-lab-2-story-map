@@ -105,7 +105,7 @@
             pointer-events: none;   /* the mouse works on the map around a panel */
         }
 
-        .step div {
+        .step > div {
             pointer-events: auto;   /* links and text in the panel still work with the mouse */
         }
 
@@ -113,7 +113,7 @@
             opacity: 1;
         }
 
-        .step div {
+        .step > div {
             padding: 8px 12px;
             line-height: 1.45;
             font-size: 14px;
@@ -408,7 +408,7 @@
             }
 
             if (record.description) {
-                var text = document.createElement('p');
+                var text = document.createElement('div');
                 text.innerHTML = record.description;
                 chapter.appendChild(text);
             }
