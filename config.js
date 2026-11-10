@@ -94,8 +94,8 @@ var config = {
         },
         {
             alignment: "center",
-            title: "Toward the water, from above",
-            description: "Chapter three. The map changes to a second style: satellite imagery with place names on top. If you scroll back up, the map changes back to the first style. The imagery is made from many satellite pictures from 2024.",
+            title: "Major Campus Developments",
+            description: "Throughout the past century, UBC has experienced many changes to its built environment. Explore three areas of the campus- Main Mall, Wesbrook Village and University Boulevard- that have undergone sgnificant change.",
             location: { center: [-123.2639, 49.2670], zoom: 14, pitch: 30, bearing: 40 },
             // This chapter's own style, in place of the style at the top
             style: "./satellite-style.json"
