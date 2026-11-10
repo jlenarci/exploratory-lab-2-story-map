@@ -111,7 +111,8 @@ var config = {
             description: "Throughout the past century, UBC has experienced many changes to its built environment. Explore three areas of the campus- Main Mall, Wesbrook Village and University Boulevard- that have undergone sgnificant change.",
             location: { center: [-123.2639, 49.2670], zoom: 14, pitch: 30, bearing: 40 },
             // This chapter's own style, in place of the style at the top
-            style: "./satellite-style.json"
+          exploreAllowed: true,
+          showMarker: false
         },
         {
             alignment: "left",
