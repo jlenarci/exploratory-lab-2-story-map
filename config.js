@@ -55,13 +55,6 @@ var config = {
     // The chapters, in the order a reader scrolls through them
     chapters: [
         {
-            alignment: "left",
-            title: "UBC Campus",
-            description: "Throughout the past 100 years, the UBC campus has undergone significant changes to accomodate a growing student population and expansion in infrastructure.",
-            location: { center: [-123.2460, 49.2606], zoom: 14, pitch: 0, bearing: 0 }
-            // No show line: this chapter shows no layers
-        },
-        {
             alignment: "full",
             title: "UBC through time 1920-2018",
             description: [
