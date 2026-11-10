@@ -50,6 +50,18 @@ var config = {
             // A black outline around the area under the mouse
             outline: true
         }
+        {
+            id: "my_developments",
+            type: "circle",
+            data: "./campus_developments.geojson",
+            paint: {
+                "circle-color": "#e67e22",
+                "circle-radius": 10,
+                "circle-stroke-color": "#ffffff",
+                "circle-stroke-width": 2
+        },
+        popup: ["name", "change"]
+            },
     ],
 
     // The chapters, in the order a reader scrolls through them
@@ -95,6 +107,7 @@ exploreAllowed: true
             description: "Throughout the past century, UBC has experienced many changes to its built environment. Explore three areas of the campus- Main Mall, Wesbrook Village and University Boulevard- that have undergone sgnificant change.",
             location: { center: [-123.2639, 49.2670], zoom: 14, pitch: 30, bearing: 40 },
             // This chapter's own style, in place of the style at the top
+        show: ["my_developments"],
           exploreAllowed: true,
           showMarker: false
         },
