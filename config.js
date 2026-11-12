@@ -69,6 +69,7 @@ var config = {
             paint: {
                 "line-color": "#007AC9",
                 "line-width": 10
+            },
         },
         {
             id: "new_buildings",
