@@ -60,7 +60,7 @@ var config = {
                 "circle-stroke-color": "#ffffff",
                 "circle-stroke-width": 2
         },
-        popup: ["name", "descrption", "photo"]
+        popup: ["name", "description", "photo"]
             },
         {
             id: "skytrain_route",
