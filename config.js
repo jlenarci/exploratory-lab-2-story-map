@@ -62,6 +62,15 @@ var config = {
         },
         popup: ["name", "change", "photo"]
             },
+        {
+            id: "skytrain_route",
+            type: "line",
+            data: "./skytrain.geojson",
+            paint: {
+                "line-color": "#007AC9",
+                "line-radius": 10
+        },
+            },
     ],
 
     // The chapters, in the order a reader scrolls through them
@@ -111,11 +120,20 @@ exploreAllowed: true
           exploreAllowed: true,
           showMarker: false
         },
-                       
+{
+    alignment: "full",
+    title: "The Future of UBC",
+    description: "<p style='text-align:center; font-size:18px;'>Looking ahead to 2050: Exploring how transportation, housing, and campus development could shape UBC's future.</p>",
+    location: {
+        center: [-123.245, 49.26], zoom: 12.5, pitch: 0, bearing: 0
+    },
+    showMarker: false,
+    showInset: false
+},            
         {
             alignment: "left",
-            title: "The Musqueam Declaration",
-            description: "Chapter five. In 1976, Musqueam Elders and leaders signed the Musqueam Declaration. In it, the Musqueam people declare that they “hold aboriginal title to our land”. On 10 June 2026, Musqueam marked the Declaration's 50th anniversary. The map's view includes the lands and waters that the Declaration describes, from Howe Sound to the south bank of the Fraser River and out to the centre of Georgia Strait.",
+            title: "Whats Next or UBC",
+            description: "Chapter three. In 1976, Musqueam Elders and leaders signed the Musqueam Declaration. In it, the Musqueam people declare that they “hold aboriginal title to our land”. On 10 June 2026, Musqueam marked the Declaration's 50th anniversary. The map's view includes the lands and waters that the Declaration describes, from Howe Sound to the south bank of the Fraser River and out to the centre of Georgia Strait.",
             location: { center: [-123.1996, 49.2303], zoom: 9.3, pitch: 0, bearing: 0 },
             style: "./satellite-style.json",
             showMarker: false,
