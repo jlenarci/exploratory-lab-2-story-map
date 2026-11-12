@@ -153,9 +153,9 @@ exploreAllowed: true
             title: "The Future of UBC",
             description: `
                 <h2>Development on Campus</h2>
-                <p>As the student and staff population continues to grow at UBC, new buildings and infrastructure will helpt to accomodate the university's changing needs. Click on the purple buildings to explore future builds on the UBC campus.</p>
+                <p>As the student and staff population continues to grow at UBC, new buildings and infrastructure will helpt to accomodate the university's changing needs. Zoom into different areas around campus and click on the purple buildings to explore what types of buildings are going to be built across campus.</p>
             `,
-            location: { center: [-123.245, 49.263], zoom: 15.5, pitch: 0, bearing: 0 },
+            location: { center: [-123.245, 49.263], zoom: 13.5, pitch: 0, bearing: 0 },
             showMarker: false,
             show: ["new_buildings"],
             exploreAllowed: true
