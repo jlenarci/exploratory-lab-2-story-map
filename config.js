@@ -134,11 +134,11 @@ exploreAllowed: true
             alignment: "left",
             title: "Millennium Line UBC Extension",
             description: "With increasing daily trips to and from the UBC campus TransLink is looking to add an extension of the Skytrain from the existing western terminus of the Millennium Line in East Vancouver to the northeast corner of West Broadway and Arbutus Street in Kitsilano. Passengers can transfer from here to the 99 B-Line bus which will continue to UBC. This extension is estimated to save the average commuter 30 minutes a day and reduce road congestion along Broadway.  ",
-            location: { center: [-123.1996, 49.2303], zoom: 9.3, pitch: 0, bearing: 0 },
+            location: { center: [-123.205, 49.263], zoom: 12, pitch: 0, bearing: 0 },
             style: "./satellite-style.json",
             showMarker: false,
             showInset: false,
-            show: ["skytrain_route"]
+            show: ["skytrain_route"],
             // A video from Youtube(Millenium Line), shown in the panel
             embed: "https://www.youtube.com/embed/F-DfZq-EXnA?si=YDnxKuTahFXzzZNc",
             embedHeight: 215,
