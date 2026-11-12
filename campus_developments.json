@@ -18,7 +18,7 @@
       "properties": {
         "name": "Wesbrook Village",
         "change": "Development of residential housing, shops, and community spaces began in the 1990s",
-        "photo": "<img src='./westbrook_mall.png' style='width:240px; height:150px; object-fit:cover;'>"
+        "photo": "<img src='./westbrook_village.png' style='width:240px; height:150px; object-fit:cover;'>"
       },
       "geometry": {
         "type": "Point",
