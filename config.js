@@ -138,6 +138,7 @@ exploreAllowed: true
             style: "./satellite-style.json",
             showMarker: false,
             showInset: false,
+            show: ["skytrain_route"]
             // A video from Youtube(Millenium Line), shown in the panel
             embed: "https://www.youtube.com/embed/F-DfZq-EXnA?si=YDnxKuTahFXzzZNc",
             embedHeight: 215,
