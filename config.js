@@ -25,7 +25,7 @@ var config = {
     auto: false,
 
     title: "A Century of Change on The UBC Campus",
-    subtitle: "How has UBC changed over the past 100 years?",
+    subtitle: "How has UBC changed over the past 100 years and what does the future look like?",
     byline: "By Jocelyn Lenarcic",
     footer: "Data: <a href='https://github.com/UBCGeodata/ubc-geospatial-opendata' target='_blank'>UBC Geodata</a>. Imagery: EOxCloudless <a href='https://cloudless.eox.at' target='_blank'>https://cloudless.eox.at</a> by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2024). Elevation (chapter four): Terrain Tiles, accessed on 29 October 2026 from <a href='https://registry.opendata.aws/terrain-tiles' target='_blank'>https://registry.opendata.aws/terrain-tiles</a>. Videos: Musqueam Indian Band (chapter five) and Metro Vancouver (chapter six), on Vimeo. Basemap: <a href='https://openfreemap.org/' target='_blank'>OpenFreeMap</a>, <a href='https://openmaptiles.org/' target='_blank'>OpenMapTiles</a>, © <a href='https://www.openstreetmap.org/copyright' target='_blank'>OpenStreetMap contributors</a>. Created using the <a href='https://github.com/opengeos/maplibre-gl-storymaps' target='_blank'>MapLibre Storytelling</a> template, inspired by <a href='https://github.com/mapbox/storytelling' target='_blank'>Mapbox Storytelling</a>.",
 
@@ -155,7 +155,7 @@ exploreAllowed: true
                 <h2>Development at UBC</h2>
                 <p>As the student and staff population continues to grow at UBC, new buildings and infrastructure will helpt to accomodate the university's changing needs. Click on the purple buildings to explore future builds on the UBC campus.</p>
             `,
-            location: { center: [-123.2295, 49.2575], zoom: 12.6, pitch: 0, bearing: 0 },
+            location: { center: [-123.245, 49.263], zoom: 15.5, pitch: 0, bearing: 0 },
             showMarker: false,
             show: ["new_buildings"],
             exploreAllowed: true
