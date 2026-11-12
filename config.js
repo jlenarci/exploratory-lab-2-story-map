@@ -152,7 +152,7 @@ exploreAllowed: true
             alignment: "left",
             title: "The Future of UBC",
             description: `
-                <h2>Development at UBC</h2>
+                <h2>Development on Campus</h2>
                 <p>As the student and staff population continues to grow at UBC, new buildings and infrastructure will helpt to accomodate the university's changing needs. Click on the purple buildings to explore future builds on the UBC campus.</p>
             `,
             location: { center: [-123.245, 49.263], zoom: 15.5, pitch: 0, bearing: 0 },
