@@ -70,6 +70,16 @@ var config = {
                 "line-color": "#007AC9",
                 "line-width": 10
         },
+        {
+            id: "new_buildings",
+            type: "fill",
+            data: "./new_buildings.geojson",
+            paint: {
+                "fill-color": "#a855f7",
+                "fill-opacity": 0.65,
+                "fill-outline-color": "#ffffff",
+        },
+        popup: ["NAME", "CONSTR_STATUS", "BLDG_USAGE"]
             },
     ],
 
@@ -129,7 +139,6 @@ exploreAllowed: true
                 <p>With increasing daily trips to and from the UBC campus TransLink is looking to add an extension of the Skytrain from the existing western terminus of the Millennium Line in East Vancouver to the northeast corner of West Broadway and Arbutus Street in Kitsilano. Passengers can transfer from here to the 99 B-Line bus which will continue to UBC. This extension is estimated to save the average commuter 30 minutes a day and reduce road congestion along Broadway.</p>
             `,
             location: { center: [-123.205, 49.263], zoom: 12, pitch: 0, bearing: 0 },
-            style: "./satellite-style.json",
             showMarker: false,
             showInset: false,
             show: ["skytrain_route"],
@@ -139,15 +148,16 @@ exploreAllowed: true
             descriptionAfter: "Video: TransLink is studying a potential SkyTrain connection to UBC. Source: TransLink "
         },
         {
-            alignment: "right",
-            title: "Pacific Spirit Regional Park",
-            description: "Chapter six. Pacific Spirit Regional Park lies between the campus and the City of Vancouver. Its forests, bog, creeks and beaches are habitat for many plants and animals.",
+            alignment: "left",
+            title: "The Future of UBC",
+            description: `
+                <h2>Development at UBC</h2>
+                <p>As the student and staff population continues to grow at UBC, new buildings and infrastructure will helpt to accomodate the university's changing needs. Click on the purple buildings to explore future builds on the UBC campus.</p>
+            `,
             location: { center: [-123.2295, 49.2575], zoom: 12.6, pitch: 0, bearing: 0 },
-            style: "./satellite-style.json",
             showMarker: false,
-            embed: "https://player.vimeo.com/video/490043811?h=45151a6105",
-            embedHeight: 215,
-            descriptionAfter: "Video: Metro Vancouver, <i>Pacific Spirit Regional Park Profile</i> (2020)."
+            show: ["future_buildings"],
+            exploreAllowed: true
         }
     ]
 };
