@@ -68,7 +68,7 @@ var config = {
             data: "./skytrain.geojson",
             paint: {
                 "line-color": "#007AC9",
-                "line-radius": 10
+                "line-width": 10
         },
             },
     ],
