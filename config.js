@@ -132,16 +132,16 @@ exploreAllowed: true
 },            
         {
             alignment: "left",
-            title: "Whats Next or UBC",
-            description: "Chapter three. In 1976, Musqueam Elders and leaders signed the Musqueam Declaration. In it, the Musqueam people declare that they “hold aboriginal title to our land”. On 10 June 2026, Musqueam marked the Declaration's 50th anniversary. The map's view includes the lands and waters that the Declaration describes, from Howe Sound to the south bank of the Fraser River and out to the centre of Georgia Strait.",
+            title: "Millennium Line UBC Extension",
+            description: "With increasing daily trips to and from the UBC campus TransLink is looking to add an extension of the Skytrain from the existing western terminus of the Millennium Line in East Vancouver to the northeast corner of West Broadway and Arbutus Street in Kitsilano. Passengers can transfer from here to the 99 B-Line bus which will continue to UBC. This extension is estimated to save the average commuter 30 minutes a day and reduce road congestion along Broadway.  ",
             location: { center: [-123.1996, 49.2303], zoom: 9.3, pitch: 0, bearing: 0 },
             style: "./satellite-style.json",
             showMarker: false,
             showInset: false,
-            // A video from Vimeo, shown in the panel
-            embed: "https://player.vimeo.com/video/1200153323?dnt=1",
+            // A video from Youtube(Millenium Line), shown in the panel
+            embed: "https://www.youtube.com/embed/F-DfZq-EXnA?si=YDnxKuTahFXzzZNc",
             embedHeight: 215,
-            descriptionAfter: "Video: Musqueam Indian Band, <i>Celebrating The 50th Anniversary Of The Musqueam Declaration</i> (2026). Read more on Musqueam's page about <a href='https://www.musqueam.bc.ca/celebrating-the-50th-anniversary-of-the-musqueam-declaration/' target='_blank'>the 50th anniversary</a>, or read <a href='https://www.musqueam.bc.ca/wp-content/uploads/2018/06/musqueam_declaration.pdf' target='_blank'>the Declaration</a> (PDF)."
+            descriptionAfter: "Video: TransLink is studying a potential SkyTrain connection to UBC. Source: TransLink "
         },
         {
             alignment: "right",
