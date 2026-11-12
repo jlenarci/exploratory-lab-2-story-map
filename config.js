@@ -60,7 +60,7 @@ var config = {
                 "circle-stroke-color": "#ffffff",
                 "circle-stroke-width": 2
         },
-        popup: ["name", "change"]
+        popup: ["name", "change", "photo"]
             },
     ],
 
