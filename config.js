@@ -156,7 +156,7 @@ exploreAllowed: true
             `,
             location: { center: [-123.2295, 49.2575], zoom: 12.6, pitch: 0, bearing: 0 },
             showMarker: false,
-            show: ["future_buildings"],
+            show: ["new_buildings"],
             exploreAllowed: true
         }
     ]
