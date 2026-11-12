@@ -120,20 +120,14 @@ exploreAllowed: true
           exploreAllowed: true,
           showMarker: false
         },
-{
-    alignment: "full",
-    title: "The Future of UBC",
-    description: "<p style='text-align:center; font-size:18px;'>Looking ahead to 2050: Exploring how transportation, housing, and campus development could shape UBC's future.</p>",
-    location: {
-        center: [-123.245, 49.26], zoom: 12.5, pitch: 0, bearing: 0
-    },
-    showMarker: false,
-    showInset: false
-},            
+           
         {
             alignment: "left",
-            title: "Millennium Line UBC Extension",
-            description: "With increasing daily trips to and from the UBC campus TransLink is looking to add an extension of the Skytrain from the existing western terminus of the Millennium Line in East Vancouver to the northeast corner of West Broadway and Arbutus Street in Kitsilano. Passengers can transfer from here to the 99 B-Line bus which will continue to UBC. This extension is estimated to save the average commuter 30 minutes a day and reduce road congestion along Broadway.  ",
+            title: "The Future of UBC",
+            description: 
+                <h2>Millenium Line UBC Extension </h2>
+                <p>With increasing daily trips to and from the UBC campus TransLink is looking to add an extension of the Skytrain from the existing western terminus of the Millennium Line in East Vancouver to the northeast corner of West Broadway and Arbutus Street in Kitsilano. Passengers can transfer from here to the 99 B-Line bus which will continue to UBC. This extension is estimated to save the average commuter 30 minutes a day and reduce road congestion along Broadway.</p>
+            '
             location: { center: [-123.205, 49.263], zoom: 12, pitch: 0, bearing: 0 },
             style: "./satellite-style.json",
             showMarker: false,
