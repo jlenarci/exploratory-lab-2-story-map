@@ -1,4 +1,4 @@
-![Vancouver Parks Map](screenshot.png)
+![Map Highlight](Screenshot 2026-11-12 at 9.01.17 PM.png)
 
 Reflective Analysis: My map explores how the UBC campus has changed over the past 100 years and how it is expected to develop in the future. It highlights significant developments in the built environment as well as proposed projects such as the SkyTrain extension and new campus infrastructure. I designed this map primarily for UBC students and faculty, providing an interactive way to explore the history of a place where they spend a significant amount of their time and consider how it may continue to change. I think my map successfully communicates the scale of physical development across campus through connecting historical imagery with present day locations. However, by focusing on infrastructure, the map does not show aspects of social and cultural changes that have occurred alongside the physical development of the campus. For example, questions about how much the student population has increased, and how campus diversity and culture have changed remain unanswered.
 
