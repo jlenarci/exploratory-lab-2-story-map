@@ -6,7 +6,7 @@
       "properties": {
         "name": "Main Mall",
         "description": "In 2011 Main Mall began the transition from a vehicle supported cooridor to a pedestrian-focused greenway.",
-        "photo": "<img src='./main_mall.png' style='width:200px; height:150px; object-fit:cover;'>"
+        "photo": "<img src='./main_mall.png' style='width:220px; height:150px; object-fit:cover;'>"
       },
       "geometry": {
         "type": "Point",
@@ -18,7 +18,7 @@
       "properties": {
         "name": "Wesbrook Village",
         "description": "In the 1990s, development of residential housing, shops, and community spaces began, transforming the previously forested area.",
-        "photo": "<img src='./westbrook_mall.png' style='width:200px; height:150px; object-fit:cover;'>"
+        "photo": "<img src='./westbrook_mall.png' style='width:220px; height:150px; object-fit:cover;'>"
       },
       "geometry": {
         "type": "Point",
@@ -30,7 +30,7 @@
       "properties": {
         "name": "University Boulevard",
         "description": "In 2018, University Boulevard replaced invasive plants with native species to enhance biodiversity and improve rainwater management.",
-        "photo": "<img src='./Screenshot 2026-11-11 at 4.31.08 PM.png' style='width:200px; height:150px; object-fit:cover;'>"
+        "photo": "<img src='./Screenshot 2026-11-11 at 4.31.08 PM.png' style='width:220px; height:150px; object-fit:cover;'>"
 
       },
       "geometry": {
